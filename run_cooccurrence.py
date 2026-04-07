@@ -190,54 +190,6 @@ def get_coocc_network(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, 
         else:
                 return network_coocc, G_coocc
 
-# def get_coocc_network_randenv(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, tmax = 150, plotNetworks = False, noise = None):
-#         ''' run the cooccurrence network pipeline for random environment noise
-#         '''
-#         if cutoff == None:
-#                 lower_cutoff, upper_cutoff = get_null_cutoff(nSpec = interactionMx.shape[0], alpha = alpha, spsamplesize = spsamplesize, numtrials = numtrials, b = b, pval_alpha = 0.01, tmax = tmax)
-#         elif type(cutoff) == float:
-#                 lower_cutoff = -cutoff
-#                 upper_cutoff = cutoff
-#         elif len(cutoff) == 2:
-#                 lower_cutoff = cutoff[0]
-#                 upper_cutoff = cutoff[1]
-
-#         assert(lower_cutoff < upper_cutoff)
-#         assert(lower_cutoff < 0)
-#         assert(upper_cutoff > 0)
-
-#         sim_res = community_sim.simulate_coOccurrence_randenv(samplesize = spsamplesize, numtrials = numtrials, a = interactionMx, b = b, alpha = alpha, tmax = tmax, y0 = None, noise = noise)
-#         coAbd = np.round(sim_res[0], 0)
-#         pearson_corr = np.corrcoef(coAbd, rowvar = False)
-#         network_coocc = np.greater(pearson_corr, upper_cutoff).astype(int) - np.less(pearson_corr, lower_cutoff).astype(int)
-#         np.fill_diagonal(network_coocc, 0)
-#         G_coocc = nx.from_numpy_array(network_coocc)
-        
-#         if plotNetworks:
-#                 G_inter = nx.from_numpy_array(interactionMx != 0)
-
-#                 normalized_interMx = interactionMx / (interactionMx.max() - interactionMx.min())
-#                 normalized_pearson_corr = pearson_corr / (pearson_corr.max() - pearson_corr.min())
-
-#                 pos = nx.spring_layout(G_inter, seed=42)
-
-#                 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-
-#                 # Plot interaction network
-#                 nx.draw(G_inter, pos, ax=ax1, with_labels=False, node_color='skyblue',
-#                         node_size=8, edge_color=['red' if normalized_interMx[u,v] < 0 else 'blue' for u,v in G_inter.edges()],
-#                         width=[abs(normalized_interMx[u,v]) * 3 for u,v in G_inter.edges()])
-#                 ax1.set_title("Interaction")
-
-#                 # Plot co-occurrence network
-#                 nx.draw(G_coocc, pos, ax=ax2, with_labels=False, node_color='skyblue',
-#                         node_size=8, edge_color=['red' if normalized_pearson_corr[u,v] < 0 else 'blue' for u,v in G_coocc.edges()],
-#                         width=[abs(normalized_pearson_corr[u,v]) * 3 for u,v in G_coocc.edges()])
-#                 ax2.set_title("Co-occurrence")
-
-#                 plt.show()
-    
-#         return network_coocc, G_coocc
 
 def get_coocc_network_traitmatch(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, traits, tmax = 150, plotNetworks = False, environ = None, pval_alpha = 0.01, envStrength = 0.5):
         ''' run the cooccurrence network pipeline for trait matching environment noise

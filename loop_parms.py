@@ -1,6 +1,6 @@
 # this makes a whole bunch of ROC curves for direct edge prediciton when running things with different parameters
 
-# similar to code from /Users/fionacallahan/Documents/Nielsen_lab/TheoryCoOccur/run_interactDetection.ipynb
+# similar to code from ./run_interactDetection.ipynb
 # adjusts samplesize to 25, 50, and 75
 # adjust numtrials to 50, 100, 250, 500, 1000
 # adjust pInteract to 0.01, 0.05, 0.1

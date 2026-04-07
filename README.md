@@ -24,7 +24,7 @@ We simulate ecological communities with known interaction structures using gener
 
 1. Generate interaction networks with specific structures using `metaCommunityMx.py`
 2. Simulate community dynamics using `run_cooccurrence.py`
-3. Analyze and compare networks using metrics tools
+3. Analyze and compare networks using network tools
 
 See Jupyter notebooks for detailed examples and analyses.
 
@@ -43,25 +43,32 @@ See Jupyter notebooks for detailed examples and analyses.
 ### Detecting direct interactions
 **[run_interactDetection.ipynb](run_interactDetection.ipynb)**
 
-### Frequency of interaction types
-**[frequency_interaction_types.ipynb](frequency_interaction_types.ipynb)**
-
 ### Hub species and node centrality
-**[run_hub.ipynb](run_hub.ipynb)**
+- **[run_hub.ipynb](run_hub.ipynb)**
 
 ### Detecting modules and modularity
-**[modularity_clustering_correctness.ipynb](modularity_clustering_correctness.ipynb)**
+- **[run_modularity_clustering_correctness.ipynb](modularity_clustering_correctness.ipynb)**
 
-### Detecting nestedness
-**[run_nested.ipynb](run_nested.ipynb)**
+### Detecting nestedness and modularity in bipartite networks
+- **[run_nested_modular.ipynb](run_nested.ipynb)**
 
 ### Differentiating between node degree distributions
-**[degree_sequence_rank.ipynb](degree_sequence_rank.ipynb)**
-**[process_data_degSeq.py](process_data_degSeq.py)**
-**[powerLaw.r](powerLaw.r)**
+- See **[run_powerlaw.sh](run_powerlaw.sh)** for usage.
+    - **[process_data_degSeq.py](process_data_degSeq.py)**
+    - **[powerLaw.r](powerLaw.r)**
 
-### Role of the environment, Detecting shifting interactions
-**[run_cooccurrence.py](run_cooccurrence.py)**
+- **[run_degree_sequence_rank.ipynb](degree_sequence_rank.ipynb)**
+- **[run_degree_not_binom.ipynb](run_degree_not_binom.ipynb)**
 
+### Supplemental results
+#### Role of the environment
+- **[run_environ.ipynb](run_environ.ipynb)**
 
+#### Frequency of interaction types
+- **[run_frequency_interaction_types.ipynb](frequency_interaction_types.ipynb)**
 
+#### Testing samples needed for power law detection
+- **[poweRlaw_test.r](poweRlaw_test.r)**
+
+#### Testing different sets of parameters
+- **[loop_parms.py](loop_parms.py)**
