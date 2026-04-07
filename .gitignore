@@ -1,0 +1,6 @@
+*.pyc
+/degree_sequences*
+Rplots*
+/degree_sequences2
+/figure_data
+/figures
