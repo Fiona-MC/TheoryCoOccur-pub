@@ -1,4 +1,4 @@
-# Code for "Pigeon Dies Alone on a Rock and other opinions"
+# Code for "Co-occurrence networks can preserve emergent properties of ecological communities"
 
 DOI: [To be added]
 
