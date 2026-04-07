@@ -41,43 +41,6 @@ def test_cluster_similarity(clusters1, clusters2):
     return shared_pairs, both_non_pairs, c1_not_c2, c2_not_c1, prop_correct
 
 
-
-def test_cluster_similarity1(clusters1, clusters2):
-    ''' Calculates the proportion of pairs in clusters1 that appear in the same community in clusters1 and clusters2
-    clusters1 is a list of sets of node names
-    clusters2 is a list of sets of node names
-    '''
-    assert set([item for s in clusters1 for item in s]) == set([item for s in clusters2 for item in s])
-
-    # Helper function to check if two nodes are in the same cluster
-    def in_same_cluster(node1, node2, clusters):
-        for cluster in clusters:
-            if node1 in cluster and node2 in cluster:
-                return True
-        return False
-    
-    shared_pairs1 = 0
-    total_pairs1 = 0
-    for cluster in clusters1:
-        for node1 in cluster:
-            for node2 in cluster:
-                if node1 != node2:
-                    total_pairs1 += 1
-                    if in_same_cluster(node1, node2, clusters2):
-                        shared_pairs1 += 1
-    
-    shared_pairs2 = 0
-    total_pairs2 = 0
-    for cluster in clusters2:
-        for node1 in cluster:
-            for node2 in cluster:
-                if node1 != node2:
-                    total_pairs2 += 1
-                    if in_same_cluster(node1, node2, clusters1):
-                        shared_pairs2 += 1
-
-    return shared_pairs1 / total_pairs1, shared_pairs2 / total_pairs2
-
 def test_bipartite_cluster_similarity(clusters1, clusters2):
     ''' Calculates the proportion of pairs that are correctly paired/unpaired (clusters1 is original interaction matrix, clusters2 is cooccurr.)
     clusters1 is a list of sets of node names
@@ -315,8 +278,6 @@ def calculate_barber_modularity_bipartite(B, partition_row, partition_col,numgro
                 if i in partition_row[k] and (j+numgroup) in partition_col[k]:  # Check if in the same community
                     Q_b += (B[i, j] - (q[i] * d[j]) / E)   
     return Q_b / E
-
-
 
 def rewire_modular(matrix, modules, nEdges, interactStren):
     '''
