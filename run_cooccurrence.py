@@ -71,12 +71,15 @@ def get_network_pairwise_pseudoP(cooc_mx, pval_alpha = 0.01, n_shuffle = 1000):
 
         return lower_cutoff_mx, upper_cutoff_mx, sig_mx
 
-def get_null_cutoff(nSpec, alpha, spsamplesize, numtrials, b, pval_alpha = 0.01, tmax = 100):
+def get_null_cutoff(nSpec, alpha, spsamplesize, numtrials, b, pval_alpha = 0.01, tmax = 100, compositional = False):
         ''' run the cooccurrence network pipeline without interactions and return the two tailed pair of cutoffs for significance
         '''
         nullInteractionMx = np.zeros(shape = (nSpec, nSpec))
         sim_res = community_sim.simulate_coOccurrence(samplesize = spsamplesize, numtrials = numtrials, a = nullInteractionMx, b = b, alpha = alpha, tmax = tmax, y0 = None)
         coAbd = np.round(sim_res[0], 0)
+        if compositional:
+                row_sums = coAbd.sum(axis=1, keepdims=True)
+                coAbd = np.where(row_sums > 0, coAbd / row_sums, 0.0)
 
         pearson_corr = np.corrcoef(coAbd, rowvar = False)
 
@@ -110,11 +113,14 @@ def get_null_cutoff_traitmatch(nSpec, alpha, spsamplesize, numtrials, b, traits,
 
         return (lower_cutoff, upper_cutoff)
 
-def get_coocc_network(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, tmax = 100, plotNetworks = False, pval_alpha = 0.01, pos = None, max_step=None, permuatation_pseudoP_n = None, permutation_cutoff_n = None, shuffle_all = True, return_pearson = False):
+def get_coocc_network(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, tmax = 100, plotNetworks = False, pval_alpha = 0.01, pos = None, max_step=None, permuatation_pseudoP_n = None, permutation_cutoff_n = None, shuffle_all = True, return_pearson = False, compositional = False):
         ''' run the cooccurrence network pipeline
         '''
         sim_res = community_sim.simulate_coOccurrence(samplesize = spsamplesize, numtrials = numtrials, a = interactionMx, b = b, alpha = alpha, tmax = tmax, y0 = None, max_step=max_step)
         coAbd = np.round(sim_res[0], 0)
+        if compositional:
+                row_sums = coAbd.sum(axis=1, keepdims=True)
+                coAbd = np.where(row_sums > 0, coAbd / row_sums, 0.0)
 
         # Diagnostic: check for zero variance and identical vectors -- note this sometimes happens when there are too many negative interactions
         # if this happens, we will have some NaN values in the correlation matrix.
@@ -142,7 +148,7 @@ def get_coocc_network(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, 
                         if permutation_cutoff_n is not None:
                                 lower_cutoff, upper_cutoff = get_null_cutoff_permute(cooc_mx = pearson_corr, pval_alpha = pval_alpha, shuffle_all = shuffle_all, n_shuffle = permutation_cutoff_n)
                         else:
-                                lower_cutoff, upper_cutoff = get_null_cutoff(nSpec = interactionMx.shape[0], alpha = alpha, spsamplesize = spsamplesize, numtrials = numtrials, b = b, pval_alpha = pval_alpha, tmax = tmax)
+                                lower_cutoff, upper_cutoff = get_null_cutoff(nSpec = interactionMx.shape[0], alpha = alpha, spsamplesize = spsamplesize, numtrials = numtrials, b = b, pval_alpha = pval_alpha, tmax = tmax, compositional = compositional)
                 elif type(cutoff) == float:
                         lower_cutoff = -cutoff
                         upper_cutoff = cutoff
@@ -190,6 +196,54 @@ def get_coocc_network(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, 
         else:
                 return network_coocc, G_coocc
 
+# def get_coocc_network_randenv(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, tmax = 150, plotNetworks = False, noise = None):
+#         ''' run the cooccurrence network pipeline for random environment noise
+#         '''
+#         if cutoff == None:
+#                 lower_cutoff, upper_cutoff = get_null_cutoff(nSpec = interactionMx.shape[0], alpha = alpha, spsamplesize = spsamplesize, numtrials = numtrials, b = b, pval_alpha = 0.01, tmax = tmax)
+#         elif type(cutoff) == float:
+#                 lower_cutoff = -cutoff
+#                 upper_cutoff = cutoff
+#         elif len(cutoff) == 2:
+#                 lower_cutoff = cutoff[0]
+#                 upper_cutoff = cutoff[1]
+
+#         assert(lower_cutoff < upper_cutoff)
+#         assert(lower_cutoff < 0)
+#         assert(upper_cutoff > 0)
+
+#         sim_res = community_sim.simulate_coOccurrence_randenv(samplesize = spsamplesize, numtrials = numtrials, a = interactionMx, b = b, alpha = alpha, tmax = tmax, y0 = None, noise = noise)
+#         coAbd = np.round(sim_res[0], 0)
+#         pearson_corr = np.corrcoef(coAbd, rowvar = False)
+#         network_coocc = np.greater(pearson_corr, upper_cutoff).astype(int) - np.less(pearson_corr, lower_cutoff).astype(int)
+#         np.fill_diagonal(network_coocc, 0)
+#         G_coocc = nx.from_numpy_array(network_coocc)
+        
+#         if plotNetworks:
+#                 G_inter = nx.from_numpy_array(interactionMx != 0)
+
+#                 normalized_interMx = interactionMx / (interactionMx.max() - interactionMx.min())
+#                 normalized_pearson_corr = pearson_corr / (pearson_corr.max() - pearson_corr.min())
+
+#                 pos = nx.spring_layout(G_inter, seed=42)
+
+#                 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+
+#                 # Plot interaction network
+#                 nx.draw(G_inter, pos, ax=ax1, with_labels=False, node_color='skyblue',
+#                         node_size=8, edge_color=['red' if normalized_interMx[u,v] < 0 else 'blue' for u,v in G_inter.edges()],
+#                         width=[abs(normalized_interMx[u,v]) * 3 for u,v in G_inter.edges()])
+#                 ax1.set_title("Interaction")
+
+#                 # Plot co-occurrence network
+#                 nx.draw(G_coocc, pos, ax=ax2, with_labels=False, node_color='skyblue',
+#                         node_size=8, edge_color=['red' if normalized_pearson_corr[u,v] < 0 else 'blue' for u,v in G_coocc.edges()],
+#                         width=[abs(normalized_pearson_corr[u,v]) * 3 for u,v in G_coocc.edges()])
+#                 ax2.set_title("Co-occurrence")
+
+#                 plt.show()
+    
+#         return network_coocc, G_coocc
 
 def get_coocc_network_traitmatch(interactionMx, cutoff, alpha, spsamplesize, numtrials, b, traits, tmax = 150, plotNetworks = False, environ = None, pval_alpha = 0.01, envStrength = 0.5):
         ''' run the cooccurrence network pipeline for trait matching environment noise
