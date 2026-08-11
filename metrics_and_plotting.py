@@ -547,3 +547,55 @@ def prop_within_btwn_mod(nSpec, nModules, matrix):
     possibleWithin = nModules * (modSize**2 - modSize)
     possibleBetween = (nSpec**2 - nSpec) - possibleWithin
     return edgeCountWithin, possibleWithin, edgeCountBetween, possibleBetween
+
+def make_random_mistakes(true_interact_network, cooc_net):
+    ''' Takes the interaction network and the co-occurrence network (symmetric adjacency matrices)
+    1) computes the confusion matrix (false and true positives)
+    2) modifies the interaction network such that there are the same number of false negatives and false positives,
+    but they are in random positions. Then outputs that null cooccurrence network.
+    '''
+    true_bin = true_interact_network != 0
+    cooc_bin = cooc_net != 0
+    n = true_bin.shape[0]
+
+    iu = np.triu_indices(n, k=1)
+    true_upper = true_bin[iu]
+    cooc_upper = cooc_bin[iu]
+
+    # get confusion mx
+    true_pos = np.sum(true_upper & cooc_upper)
+    false_pos = np.sum(~true_upper & cooc_upper)
+    false_neg = np.sum(true_upper & ~cooc_upper)
+    true_neg = np.sum(~true_upper & ~cooc_upper)
+
+    pos_pair_indices = np.where(true_upper)[0]
+    neg_pair_indices = np.where(~true_upper)[0]
+
+    # pick random fps and fns to add
+    fn_choice = np.random.choice(pos_pair_indices, size=false_neg, replace=False)
+    fp_choice = np.random.choice(neg_pair_indices, size=false_pos, replace=False)
+
+    null_cooc_net = true_bin.astype(int)
+
+    rows_fn, cols_fn = iu[0][fn_choice], iu[1][fn_choice]
+    null_cooc_net[rows_fn, cols_fn] = 0
+    null_cooc_net[cols_fn, rows_fn] = 0
+
+    rows_fp, cols_fp = iu[0][fp_choice], iu[1][fp_choice]
+    null_cooc_net[rows_fp, cols_fp] = 1
+    null_cooc_net[cols_fp, rows_fp] = 1
+
+    # check that the null network has the same number of edges as the real cooc_net
+    null_cooc_bin = null_cooc_net != 0
+    assert np.sum(null_cooc_bin[iu]) == np.sum(cooc_upper)
+
+    # check that the null network has the same number of false positives/negatives as cooc_net
+    null_upper = null_cooc_bin[iu]
+    null_false_pos = np.sum(~true_upper & null_upper)
+    null_false_neg = np.sum(true_upper & ~null_upper)
+    assert null_false_pos == false_pos
+    assert null_false_neg == false_neg
+
+    confusion_matrix = (true_pos, false_pos, false_neg, true_neg)
+    return null_cooc_net, confusion_matrix
+
