@@ -554,7 +554,8 @@ def make_random_mistakes(true_interact_network, cooc_net):
     2) modifies the interaction network such that there are the same number of false negatives and false positives,
     but they are in random positions. Then outputs that null cooccurrence network.
     '''
-    true_bin = true_interact_network != 0
+    # interaction exists if present in either direction 
+    true_bin = (true_interact_network != 0) | (true_interact_network.T != 0)
     cooc_bin = cooc_net != 0
     n = true_bin.shape[0]
 
